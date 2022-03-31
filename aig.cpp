@@ -180,18 +180,30 @@ void InitializeNodeNetwork(NodeNetwork &nn, std::vector<int> &num_nodes) {
   }
   // Connections
   for (int i = nn.nodes.size() - 1; i > 0; i--) {
-    std::vector<int> rowIdxs(nn.nodes[i - 1].size());
+    std::vector<int> col_idxs(nn.nodes[i - 1].size());
     for (int j = 0; j < nn.nodes[i].size(); j++) {
-      std::iota(rowIdxs.begin(), rowIdxs.end(), 0);
+      std::iota(col_idxs.begin(), col_idxs.end(), 0);
       std::vector<int> choice;
-      std::experimental::sample(rowIdxs.begin(), rowIdxs.end(), std::back_inserter(choice),
+      std::experimental::sample(col_idxs.begin(), col_idxs.end(), std::back_inserter(choice),
                   2, std::mt19937{std::random_device{}()});
-      for (int colIdx : choice) {
-        nn.nodes[i][j].parents.push_back(&nn.nodes[i - 1][colIdx]);
-        nn.nodes[i - 1][colIdx].children.push_back(&nn.nodes[i][j]);
+      for (int col_idx : choice) {
+        nn.nodes[i][j].parents.push_back(&nn.nodes[i - 1][col_idx]);
+        nn.nodes[i - 1][col_idx].children.push_back(&nn.nodes[i][j]);
         nn.nodes[i][j].negates.push_back(rand() % 2);
         nn.nodes[i][j].negates.push_back(rand() % 2);
       }
     }
+  }
+}
+
+// Only works with 1 output node
+void GetActiveNodes(Node &node, std::vector<Node*> &locs) {
+  //std::cout << "(" << node.loc0 << ", " << node.loc1 << ") par: " << node.parents.size() << std::endl;
+  if (node.loc0 == 0) {
+    return;
+  }
+  locs.push_back(&node);
+  for (Node* parent : node.parents) {
+    GetActiveNodes(*parent, locs);
   }
 }

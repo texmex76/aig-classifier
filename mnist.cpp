@@ -5,6 +5,8 @@
 #include <vector>
 #include "mnist.hpp"
 
+// Begin
+// Taken from https://compvisionlab.wordpress.com/2014/01/01/c-code-for-reading-mnist-data-set/
 int ReverseInt (int i)
 {
     unsigned char ch1, ch2, ch3, ch4;
@@ -46,7 +48,9 @@ void ReadMNIST(int NumberOfImages, int DataOfAnImage, std::string MNISTPath, std
         }
     }
 }
+// End
 
+// Also taken from https://compvisionlab.wordpress.com/2014/01/01/c-code-for-reading-mnist-data-set/, but modified
 void ReadMNISTLabels(int NumberOfImages, std::string MNISTPath, std::vector<double> &arr)
 {
     arr.resize(NumberOfImages);

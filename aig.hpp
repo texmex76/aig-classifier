@@ -26,3 +26,5 @@ void CreateAagRepr(NodeNetwork &nn);
 void ExportAagRepr(NodeNetwork &nn, std::string export_path);
 
 void CreateSimulationFile(std::vector<std::vector<bool>> &X, std::string export_path);
+
+void GetActiveNodes(Node &node, std::vector<Node*> &locs);
