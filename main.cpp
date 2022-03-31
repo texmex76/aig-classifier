@@ -27,8 +27,8 @@ int main (int argc, char *argv[]) {
   for (int num : num_nodes) {sum_nodes += num;}
   std::cout << "All nodes: " << sum_nodes << std::endl;
   std::cout << "All nodes in active_nodes after: " << active_nodes.size() << std::endl;
-  ExportAagRepr(nn, "tmp/nn.aag");
 
+  ExportAigToPdf(nn, "tmp/test.pdf");
   //// Reading train images and binarizing
   //std::vector<std::vector<double>> X_train_;
   //ReadMNIST(60000,784,"data/train-images.idx3-ubyte", X_train_);

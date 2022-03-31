@@ -28,3 +28,9 @@ void ExportAagRepr(NodeNetwork &nn, std::string export_path);
 void CreateSimulationFile(std::vector<std::vector<bool>> &X, std::string export_path);
 
 void GetActiveNodes(Node &node, std::vector<Node*> &locs);
+
+void ExportAigToPdf(NodeNetwork &nn, std::string pdf_file);
+
+std::vector<bool> Predict(NodeNetwork &nn, std::vector<std::vector<bool>> &X, std::string export_folder);
+
+void InitializeNodeNetwork(NodeNetwork &nn, std::vector<int> &num_nodes);

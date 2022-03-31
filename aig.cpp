@@ -105,6 +105,21 @@ void CreateSimulationFile(std::vector<std::vector<bool>> &X, std::string export_
   o.close();
 }
 
+void ExportAigToPdf(NodeNetwork &nn, std::string pdf_file) {
+  std::string aag_file = "tmp.aag_" + GenerateHex(10);
+  ExportAagRepr(nn, aag_file);
+  std::string dot_file = "tmp.dot_" + GenerateHex(10);
+
+  std::string exec_aig_str = "aiger/aigtodot " + aag_file + " > " + dot_file;
+  std::string exec_dot_str = "dot -Tpdf " + dot_file + " -o " + pdf_file;
+  Exec(exec_aig_str.c_str());
+  Exec(exec_dot_str.c_str());
+
+  // Delete files after use
+  const int remove_aag_file_result = remove(aag_file.c_str());
+  const int remove_dot_file_result = remove(dot_file.c_str());
+}
+
 std::vector<bool> Predict(NodeNetwork &nn, std::vector<std::vector<bool>> &X, std::string export_folder) {
   std::string stim_file = export_folder + "/stim_" + GenerateHex(10);
   CreateSimulationFile(X, stim_file);
