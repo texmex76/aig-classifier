@@ -120,7 +120,7 @@ void ExportAigToPdf(NodeNetwork &nn, std::string pdf_file) {
   const int remove_dot_file_result = remove(dot_file.c_str());
 }
 
-std::vector<bool> Predict(NodeNetwork &nn, std::vector<std::vector<bool>> &X, std::string export_folder) {
+std::vector<bool> Predict(NodeNetwork &nn, std::vector<std::vector<bool>> &X, std::string export_folder, bool keep_files) {
   std::string stim_file = export_folder + "/stim_" + GenerateHex(10);
   CreateSimulationFile(X, stim_file);
   std::string aag_file = export_folder + "/tmp.aag_" + GenerateHex(10);
@@ -129,8 +129,10 @@ std::vector<bool> Predict(NodeNetwork &nn, std::vector<std::vector<bool>> &X, st
   std::string out = Exec(exec_str.c_str());
 
   // Delete files after use
-  const int remove_stim_file_result = remove(stim_file.c_str());
-  const int remove_aag_file_result = remove(aag_file.c_str());
+  if (!keep_files) {
+    const int remove_stim_file_result = remove(stim_file.c_str());
+    const int remove_aag_file_result = remove(aag_file.c_str());
+  }
 
   const std::regex re("\\s(\\d+)\\s");
   while (std::regex_search(out, re)) {
