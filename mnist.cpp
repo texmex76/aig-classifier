@@ -30,7 +30,8 @@ void ReadMNIST(int NumberOfImages, int DataOfAnImage, std::string MNISTPath, std
         MNISTFile.read((char*)&magic_number,sizeof(magic_number));
         magic_number= ReverseInt(magic_number);
         MNISTFile.read((char*)&number_of_images,sizeof(number_of_images));
-        number_of_images= ReverseInt(number_of_images); MNISTFile.read((char*)&n_rows,sizeof(n_rows));
+        number_of_images= ReverseInt(number_of_images);
+        MNISTFile.read((char*)&n_rows,sizeof(n_rows));
         n_rows= ReverseInt(n_rows);
         MNISTFile.read((char*)&n_cols,sizeof(n_cols));
         n_cols= ReverseInt(n_cols);

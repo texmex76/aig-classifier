@@ -3,3 +3,5 @@ aiger
 tmp
 picosat
 main
+.ipynb_checkpoints/
+__pycache__/
