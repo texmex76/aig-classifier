@@ -125,7 +125,7 @@ std::vector<bool> Predict(NodeNetwork &nn, std::vector<std::vector<bool>> &X, st
   CreateSimulationFile(X, stim_file);
   std::string aag_file = export_folder + "/tmp.aag_" + GenerateHex(10);
   ExportAagRepr(nn, aag_file);
-  std::string exec_str = "aiger/aigsim " + aag_file + " " + stim_file;
+  std::string exec_str = "aiger/aigsim -m " + aag_file + " " + stim_file;
   std::string out = Exec(exec_str.c_str());
 
   // Delete files after use
@@ -222,5 +222,21 @@ void GetActiveNodes(Node &node, std::vector<Node*> &locs) {
   locs.push_back(&node);
   for (Node* parent : node.parents) {
     GetActiveNodes(*parent, locs);
+  }
+}
+
+void ChangeParent(Node* node, int parent_idx, NodeNetwork &nn) {
+  assert(nn.nodes[node->loc0 - 1].size() > 2); // If the previous layer has only 2 nodes, then there is nothing to change
+  while (true) {
+    std::vector<int> col_idxs(nn.nodes[node->loc0 - 1].size());
+    std::iota(col_idxs.begin(), col_idxs.end(), 0);
+    std::vector<int> choice;
+    std::experimental::sample(col_idxs.begin(), col_idxs.end(), std::back_inserter(choice), 1, std::mt19937{std::random_device{}()});
+    if (choice[0] != node->parents[parent_idx]->loc1 && choice[0] != node->parents[!parent_idx]->loc1) {
+      node->parents[parent_idx]->children.erase(std::find(node->parents[parent_idx]->children.begin(),node->parents[parent_idx]->children.end(),node));
+      node->parents[parent_idx] = &nn.nodes[node->loc0 - 1][choice[0]];
+      node->parents[parent_idx]->children.push_back(node);
+      break;
+    }
   }
 }

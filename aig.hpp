@@ -34,3 +34,5 @@ void ExportAigToPdf(NodeNetwork &nn, std::string pdf_file);
 std::vector<bool> Predict(NodeNetwork &nn, std::vector<std::vector<bool>> &X, std::string export_folder, bool keep_files = false);
 
 void InitializeNodeNetwork(NodeNetwork &nn, std::vector<int> &num_nodes);
+
+void ChangeParent(Node* node, int parent_idx, NodeNetwork &nn);
