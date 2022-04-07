@@ -79,27 +79,34 @@ int main (int argc, char *argv[]) {
   //std::vector<bool> pred = Predict(nn, X_train, "tmp");
   //std::cout << "Accuracy orig: " << AccuracyScore(y_train, pred) << std::endl;
 
-  // Change nothing:    0
-  // Change polarity 0: 1
-  // Change polarity 1: 2
-  // Change parent 0:   3
-  // Change parent 1:   4
-  // Vector: nodes
-  // Vector: change {0, 1, 2, 3, 4}
-  // Vector: parent
-  // Vector: accuracies
+  /*
+   Change nothing:    0
+   Change polarity 0: 1
+   Change polarity 1: 2
+   Change parent 0:   3
+   Change parent 1:   4
+   Vector: nodes
+   Vector: change {0, 1, 2, 3, 4}
+   Vector: parent
+   Vector: accuracies
+  */
 
   // Those will be overwritten frequently
   std::vector<bool> pred;
   double score;
   Node* old_parent;
-  // End
-
+  int no_change = 0;
   std::vector<double> accuracies;
   std::vector<int> mode;
   std::vector<Node*> node_candidates;
   std::vector<Node*> parent_candidates;
+  double best = 0;
+  int iteration = 0;
+  // End
 
+  int patience = 5;
+
+  while (no_change < patience) {
   pred = Predict(nn, X_train, "tmp");
   score = AccuracyScore(y_train, pred);
   accuracies.push_back(score);
@@ -160,9 +167,45 @@ int main (int argc, char *argv[]) {
     // Registering node at old parent again
     node->parents[1]->children.push_back(node);
   }
-  for (int i = 0; i < accuracies.size(); i++) {
-    std::cout << "mode: " << mode[i] << " acc: " << accuracies[i] << std::endl;
+
+  int max_index = std::max_element(accuracies.begin(), accuracies.end()) - accuracies.begin();
+  double max = *std::max_element(accuracies.begin(), accuracies.end());
+
+  if (max > best) {
+    switch (mode[max_index]) {
+      case 0:
+        break; // do nothing
+      case 1:
+        node_candidates[max_index]->negates[0] = !node_candidates[max_index]->negates[0];
+        break;
+      case 2:
+        node_candidates[max_index]->negates[1] = !node_candidates[max_index]->negates[1];
+        break;
+      case 3:
+        node_candidates[max_index]->parents[0]->children.erase(std::find(node_candidates[max_index]->parents[0]->children.begin(),node_candidates[max_index]->parents[0]->children.end(),node_candidates[max_index]));
+        node_candidates[max_index]->parents[0] = parent_candidates[max_index];
+        node_candidates[max_index]->parents[0]->children.push_back(node_candidates[max_index]);
+        break;
+      case 4:
+        node_candidates[max_index]->parents[1]->children.erase(std::find(node_candidates[max_index]->parents[1]->children.begin(),node_candidates[max_index]->parents[1]->children.end(),node_candidates[max_index]));
+        node_candidates[max_index]->parents[1] = parent_candidates[max_index];
+        node_candidates[max_index]->parents[1]->children.push_back(node_candidates[max_index]);
+        break;
+    }
+  } else {
+    no_change += 1;
   }
+
+  std::cout << "Iter: " << iteration << " Accuracy: " << max << std::endl;
+
+  // Vectors have to be empty for next iteration
+  accuracies.clear();
+  mode.clear();
+  node_candidates.clear();
+  parent_candidates.clear();
+  iteration += 1;
+  }
+
 
   return 0;
 }
