@@ -36,3 +36,17 @@ std::vector<bool> Predict(NodeNetwork &nn, std::vector<std::vector<bool>> &X, st
 void InitializeNodeNetwork(NodeNetwork &nn, std::vector<int> &num_nodes);
 
 void ChangeParent(Node* node, int parent_idx, NodeNetwork &nn);
+
+void SaveRun(NodeNetwork &nn, std::string save_folder);
+
+void SearchAroundNode(
+  Node* node,
+  std::vector<bool> &pred,
+  double &score,
+  Node* old_parent,
+  std::vector<double> &accuracies,
+  std::vector<int> &mode,
+  std::vector<Node*> &node_candidates,
+  std::vector<Node*> &parent_candidates,
+  std::vector<std::vector<bool>> &X_train,
+  std::vector<bool> &y_train);

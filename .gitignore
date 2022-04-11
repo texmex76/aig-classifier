@@ -5,3 +5,4 @@ picosat
 main
 .ipynb_checkpoints/
 __pycache__/
+results/

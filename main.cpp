@@ -7,6 +7,8 @@
 #include <experimental/algorithm>
 #include <regex>
 #include <assert.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 #include "mnist.cpp"
 #include "aig.cpp"
@@ -14,7 +16,7 @@
 
 int main (int argc, char *argv[]) {
   //std::vector<int> num_nodes{5, 3, 3, 3, 1};
-  std::vector<int> num_nodes{16, 16, 8, 4, 1};
+  std::vector<int> num_nodes{16, 10, 10, 10, 10, 10, 10, 1};
   //std::vector<int> num_nodes{784, 512, 128, 32, 1};
   NodeNetwork nn;
   InitializeNodeNetwork(nn, num_nodes);
@@ -70,15 +72,6 @@ int main (int argc, char *argv[]) {
   //std::vector<bool> y_test;
   //BinarizeMNISTLabels(y_test_, y_test);
 
-  //std::vector<std::vector<bool>> v;
-  //v.push_back({true, true, false, true, true});
-  //v.push_back({false, true, true, true, false});
-  //v.push_back({false, true, true, true, true});
-  //v.push_back({true, true, true, true, true});
-
-  //std::vector<bool> pred = Predict(nn, X_train, "tmp");
-  //std::cout << "Accuracy orig: " << AccuracyScore(y_train, pred) << std::endl;
-
   /*
    Change nothing:    0
    Change polarity 0: 1
@@ -104,7 +97,9 @@ int main (int argc, char *argv[]) {
   int iteration = 0;
   // End
 
-  int patience = 5;
+  // These are parameters
+  int patience = 10;
+  double tol = 0.001;
 
   while (no_change < patience) {
   pred = Predict(nn, X_train, "tmp");
@@ -115,63 +110,26 @@ int main (int argc, char *argv[]) {
   parent_candidates.emplace_back(); // Adding empty item
 
   for (Node* node : active_nodes) {
-    // 1: Change polarity 0
-    node->negates[0] = !node->negates[0];
-    pred = Predict(nn, X_train, "tmp");
-    score = AccuracyScore(y_train, pred);
-    accuracies.push_back(score);
-    mode.push_back(1); // 1 stands for "change polarity 0"
-    node_candidates.push_back(node);
-    parent_candidates.emplace_back(); // Adding empty item
-    node->negates[0] = !node->negates[0]; // Reverting modes
-
-    // 2: Change polarity 1
-    node->negates[1] = !node->negates[1];
-    pred = Predict(nn, X_train, "tmp");
-    score = AccuracyScore(y_train, pred);
-    accuracies.push_back(score);
-    mode.push_back(2); // 2 stands for "change polarity 1"
-    node_candidates.push_back(node);
-    parent_candidates.emplace_back(); // Adding empty item
-    node->negates[1] = !node->negates[1]; // Reverting modes
-
-    // 3: Change parent 0
-    old_parent = node->parents[0];
-    ChangeParent(node, 0, nn);
-    pred = Predict(nn, X_train, "tmp");
-    score = AccuracyScore(y_train, pred);
-    accuracies.push_back(score);
-    mode.push_back(3); // 3 stands for "change parent 0"
-    node_candidates.push_back(node);
-    parent_candidates.push_back(node->parents[0]);
-    // Deregistering node from new parent
-    node->parents[0]->children.erase(std::find(node->parents[0]->children.begin(),node->parents[0]->children.end(),node));
-    // Setting parent to old parent
-    node->parents[0] = old_parent;
-    // Registering node at old parent again
-    node->parents[0]->children.push_back(node);
-
-    // 4: Change parent 1
-    old_parent = node->parents[1];
-    ChangeParent(node, 1, nn);
-    pred = Predict(nn, X_train, "tmp");
-    score = AccuracyScore(y_train, pred);
-    accuracies.push_back(score);
-    mode.push_back(4); // 4 stands for "change parent 1"
-    node_candidates.push_back(node);
-    parent_candidates.push_back(node->parents[1]);
-    // Deregistering node from new parent
-    node->parents[1]->children.erase(std::find(node->parents[1]->children.begin(),node->parents[1]->children.end(),node));
-    // Setting parent to old parent
-    node->parents[1] = old_parent;
-    // Registering node at old parent again
-    node->parents[1]->children.push_back(node);
+    SearchAroundNode(
+      node,
+      nn,
+      pred,
+      score,
+      old_parent,
+      accuracies,
+      mode,
+      node_candidates,
+      parent_candidates,
+      X_train,
+      y_train);
   }
 
   int max_index = std::max_element(accuracies.begin(), accuracies.end()) - accuracies.begin();
   double max = *std::max_element(accuracies.begin(), accuracies.end());
 
-  if (max > best) {
+  if (max > best + tol) {
+    best = max;
+    no_change = 0;
     switch (mode[max_index]) {
       case 0:
         break; // do nothing
@@ -204,8 +162,14 @@ int main (int argc, char *argv[]) {
   node_candidates.clear();
   parent_candidates.clear();
   iteration += 1;
+
+  // Active nodes may have changed after changing architecture
+  active_nodes.clear();
+  GetActiveNodes(nn.nodes.back()[0], active_nodes);
+  GetUniquesAndSort(active_nodes);
   }
 
+  SaveRun(nn, "results");
 
   return 0;
 }

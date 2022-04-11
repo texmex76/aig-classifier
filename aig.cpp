@@ -1,5 +1,6 @@
 #include "aig.hpp"
 #include "utils.cpp"
+#include "ml.hpp"
 
 Node::Node (int a, int b, int c, int d) {type = a; var_id = b; loc0 = c; loc1 = d;}
 
@@ -239,4 +240,96 @@ void ChangeParent(Node* node, int parent_idx, NodeNetwork &nn) {
       break;
     }
   }
+}
+
+void SaveRun(NodeNetwork &nn, std::string save_folder) {
+  int file_cnt = 0;
+
+  DIR *dir;
+  struct dirent *diread;
+
+  if ((dir = opendir(save_folder.c_str())) != nullptr) {
+      while ((diread = readdir(dir)) != nullptr) {
+          file_cnt += 1;
+      }
+      closedir(dir);
+  } else {
+      perror("Could not save AIG");
+  }
+  file_cnt -= 2; // First two are . and ..
+
+  std::string num = std::to_string(file_cnt);
+  std::string padding = "";
+  while(padding.length() + num.length() < 4) {
+      padding += "0";
+  }
+  std::string folder_path = save_folder + "/" + padding + num;
+  mkdir(folder_path.c_str(), ACCESSPERMS);
+  ExportAagRepr(nn, save_folder + "/" + padding + num + "/aig.aag");
+}
+
+void SearchAroundNode(
+  Node* node,
+  NodeNetwork &nn,
+  std::vector<bool> &pred,
+  double &score,
+  Node* old_parent,
+  std::vector<double> &accuracies,
+  std::vector<int> &mode,
+  std::vector<Node*> &node_candidates,
+  std::vector<Node*> &parent_candidates,
+  std::vector<std::vector<bool>> &X_train,
+  std::vector<bool> &y_train
+  ) {
+  // 1: Change polarity 0
+  node->negates[0] = !node->negates[0];
+  pred = Predict(nn, X_train, "tmp");
+  score = AccuracyScore(y_train, pred);
+  accuracies.push_back(score);
+  mode.push_back(1); // 1 stands for "change polarity 0"
+  node_candidates.push_back(node);
+  parent_candidates.emplace_back(); // Adding empty item
+  node->negates[0] = !node->negates[0]; // Reverting modes
+
+  // 2: Change polarity 1
+  node->negates[1] = !node->negates[1];
+  pred = Predict(nn, X_train, "tmp");
+  score = AccuracyScore(y_train, pred);
+  accuracies.push_back(score);
+  mode.push_back(2); // 2 stands for "change polarity 1"
+  node_candidates.push_back(node);
+  parent_candidates.emplace_back(); // Adding empty item
+  node->negates[1] = !node->negates[1]; // Reverting modes
+
+  // 3: Change parent 0
+  old_parent = node->parents[0];
+  ChangeParent(node, 0, nn);
+  pred = Predict(nn, X_train, "tmp");
+  score = AccuracyScore(y_train, pred);
+  accuracies.push_back(score);
+  mode.push_back(3); // 3 stands for "change parent 0"
+  node_candidates.push_back(node);
+  parent_candidates.push_back(node->parents[0]);
+  // Deregistering node from new parent
+  node->parents[0]->children.erase(std::find(node->parents[0]->children.begin(),node->parents[0]->children.end(),node));
+  // Setting parent to old parent
+  node->parents[0] = old_parent;
+  // Registering node at old parent again
+  node->parents[0]->children.push_back(node);
+
+  // 4: Change parent 1
+  old_parent = node->parents[1];
+  ChangeParent(node, 1, nn);
+  pred = Predict(nn, X_train, "tmp");
+  score = AccuracyScore(y_train, pred);
+  accuracies.push_back(score);
+  mode.push_back(4); // 4 stands for "change parent 1"
+  node_candidates.push_back(node);
+  parent_candidates.push_back(node->parents[1]);
+  // Deregistering node from new parent
+  node->parents[1]->children.erase(std::find(node->parents[1]->children.begin(),node->parents[1]->children.end(),node));
+  // Setting parent to old parent
+  node->parents[1] = old_parent;
+  // Registering node at old parent again
+  node->parents[1]->children.push_back(node);
 }
