@@ -37,7 +37,7 @@ void InitializeNodeNetwork(NodeNetwork &nn, std::vector<int> &num_nodes);
 
 void ChangeParent(Node* node, int parent_idx, NodeNetwork &nn);
 
-void SaveRun(NodeNetwork &nn, std::string save_folder);
+void SaveRun(NodeNetwork &nn, std::string out_str, std::string save_folder);
 
 void SearchAroundNode(
   Node* node,

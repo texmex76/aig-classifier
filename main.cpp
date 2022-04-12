@@ -16,7 +16,7 @@
 
 int main (int argc, char *argv[]) {
   //std::vector<int> num_nodes{5, 3, 3, 3, 1};
-  std::vector<int> num_nodes{16, 10, 10, 10, 10, 10, 10, 1};
+  std::vector<int> num_nodes{16, 16, 16, 1};
   //std::vector<int> num_nodes{784, 512, 128, 32, 1};
   NodeNetwork nn;
   InitializeNodeNetwork(nn, num_nodes);
@@ -95,11 +95,22 @@ int main (int argc, char *argv[]) {
   std::vector<Node*> parent_candidates;
   double best = 0;
   int iteration = 0;
+  std::string out_str = "";
+  std::string out_str_tmp = "";
   // End
 
   // These are parameters
   int patience = 10;
   double tol = 0.001;
+
+  out_str_tmp += "arc ";
+  for (auto layer : nn.nodes) {
+    out_str_tmp += std::to_string(layer.size()) + " ";
+  }
+  out_str_tmp += "\n";
+  std::cout << out_str_tmp;
+  out_str += out_str_tmp;
+  out_str_tmp = "";
 
   while (no_change < patience) {
   pred = Predict(nn, X_train, "tmp");
@@ -154,7 +165,10 @@ int main (int argc, char *argv[]) {
     no_change += 1;
   }
 
-  std::cout << "Iter: " << iteration << " Accuracy: " << max << std::endl;
+  out_str_tmp = "Iter " + std::to_string(iteration) + " Accuracy " + std::to_string(max) + "\n";
+  std::cout << out_str_tmp;
+  out_str += out_str_tmp;
+  out_str_tmp = "";
 
   // Vectors have to be empty for next iteration
   accuracies.clear();
@@ -169,7 +183,7 @@ int main (int argc, char *argv[]) {
   GetUniquesAndSort(active_nodes);
   }
 
-  SaveRun(nn, "results");
+  SaveRun(nn, out_str, "results");
 
   return 0;
 }

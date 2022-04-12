@@ -242,7 +242,7 @@ void ChangeParent(Node* node, int parent_idx, NodeNetwork &nn) {
   }
 }
 
-void SaveRun(NodeNetwork &nn, std::string save_folder) {
+void SaveRun(NodeNetwork &nn, std::string out_str, std::string save_folder) {
   int file_cnt = 0;
 
   DIR *dir;
@@ -266,6 +266,11 @@ void SaveRun(NodeNetwork &nn, std::string save_folder) {
   std::string folder_path = save_folder + "/" + padding + num;
   mkdir(folder_path.c_str(), ACCESSPERMS);
   ExportAagRepr(nn, save_folder + "/" + padding + num + "/aig.aag");
+
+  std::ofstream o;
+  o.open(save_folder + "/" + padding + num + "/" + padding + num + ".log");
+  o << out_str;
+  o.close();
 }
 
 void SearchAroundNode(
