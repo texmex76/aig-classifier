@@ -1,0 +1,10 @@
+name: aig
+channels:
+  - pytorch
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - numpy
+  - matplotlib
+  - scikit-learn
