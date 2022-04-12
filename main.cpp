@@ -16,7 +16,7 @@
 
 int main (int argc, char *argv[]) {
   //std::vector<int> num_nodes{5, 3, 3, 3, 1};
-  std::vector<int> num_nodes{16, 16, 16, 1};
+  std::vector<int> num_nodes{16, 16, 16, 16, 1};
   //std::vector<int> num_nodes{784, 512, 128, 32, 1};
   NodeNetwork nn;
   InitializeNodeNetwork(nn, num_nodes);
