@@ -333,6 +333,7 @@ void SearchAroundNode(
   parent_candidates.emplace_back(); // Adding empty item
   node->negates[1] = !node->negates[1]; // Reverting modes
 
+  /*
   // Change parent 0 full search
   old_parent = node->parents[0];
   for (int i = 0; i < node->loc0; i++) {
@@ -384,9 +385,11 @@ void SearchAroundNode(
       }
     }
   }
+  */
 
-  /*
   // 3: Change parent 0 heuristic search
+#pragma omp critical
+  {
   old_parent = node->parents[0];
   ChangeParent(node, 0, nn);
   pred = Predict(nn, X_train, "tmp");
@@ -401,10 +404,11 @@ void SearchAroundNode(
   node->parents[0] = old_parent;
   // Registering node at old parent again
   node->parents[0]->children.push_back(node);
-  */
+  }
 
-  /*
   // 4: Change parent 1 heuristic search
+#pragma omp critical
+  {
   old_parent = node->parents[1];
   ChangeParent(node, 1, nn);
   pred = Predict(nn, X_train, "tmp");
@@ -419,5 +423,5 @@ void SearchAroundNode(
   node->parents[1] = old_parent;
   // Registering node at old parent again
   node->parents[1]->children.push_back(node);
-  */
+  }
 }

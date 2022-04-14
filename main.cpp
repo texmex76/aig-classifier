@@ -9,6 +9,8 @@
 #include <assert.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include "omp.h"
+#include <chrono>
 
 #include "mnist.cpp"
 #include "aig.cpp"
@@ -16,8 +18,8 @@
 
 int main (int argc, char *argv[]) {
   //std::vector<int> num_nodes{5, 3, 3, 3, 1};
-  std::vector<int> num_nodes{16, 16, 16, 16, 1};
-  //std::vector<int> num_nodes{784, 512, 128, 32, 1};
+  //std::vector<int> num_nodes{16, 16, 16, 16, 16, 16, 16, 1};
+  std::vector<int> num_nodes{784, 512, 128, 32, 1};
   NodeNetwork nn;
   InitializeNodeNetwork(nn, num_nodes);
 
@@ -27,25 +29,25 @@ int main (int argc, char *argv[]) {
   GetUniquesAndSort(active_nodes);
 
   //// Reading train images and binarizing
-  //std::vector<std::vector<double>> X_train_;
-  //ReadMNIST(60000,784,"data/train-images.idx3-ubyte", X_train_);
-  //std::vector<std::vector<bool>> X_train;
-  //BinarizeMNIST(X_train_, X_train);
+  std::vector<std::vector<double>> X_train_;
+  ReadMNIST(60000,784,"data/train-images.idx3-ubyte", X_train_);
+  std::vector<std::vector<bool>> X_train;
+  BinarizeMNIST(X_train_, X_train);
 
   //// Reading PCA-reduced train images and binarizing
-  std::vector<std::vector<double>> X_train_;
-  ReadMNIST(60000,16,"data/train-images-pca16-idx3-ubyte", X_train_);
-  std::vector<std::vector<bool>> X_train;
-  X_train.resize(60000);
-  for (int i = 0; i < X_train_.size(); i++) {
-    for (int j = 0; j < X_train_[i].size(); j++) {
-      if (X_train_[i][j] == 1.0) {
-        X_train[i].push_back(true);
-      } else {
-        X_train[i].push_back(false);
-      }
-    }
-  }
+  //std::vector<std::vector<double>> X_train_;
+  //ReadMNIST(60000,16,"data/train-images-pca16-idx3-ubyte", X_train_);
+  //std::vector<std::vector<bool>> X_train;
+  //X_train.resize(60000);
+  //for (int i = 0; i < X_train_.size(); i++) {
+    //for (int j = 0; j < X_train_[i].size(); j++) {
+      //if (X_train_[i][j] == 1.0) {
+        //X_train[i].push_back(true);
+      //} else {
+        //X_train[i].push_back(false);
+      //}
+    //}
+  //}
 
   assert(num_nodes[0] == X_train[0].size()); // input dimension has to match
   assert (num_nodes.back() == 1); // for now we only do binary classification
@@ -120,6 +122,9 @@ int main (int argc, char *argv[]) {
   node_candidates.emplace_back(); // Adding empty item
   parent_candidates.emplace_back(); // Adding empty item
 
+  //auto start = std::chrono::high_resolution_clock::now();
+
+#pragma omp parallel for
   for (Node* node : active_nodes) {
     SearchAroundNode(
       node,
@@ -134,6 +139,10 @@ int main (int argc, char *argv[]) {
       X_train,
       y_train);
   }
+
+    //auto stop = std::chrono::high_resolution_clock::now();
+    //auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
+    //std::cout << "Iter took " << duration.count() << " seconds" << std::endl;
 
   int max_index = std::max_element(accuracies.begin(), accuracies.end()) - accuracies.begin();
   double max = *std::max_element(accuracies.begin(), accuracies.end());
