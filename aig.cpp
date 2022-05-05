@@ -93,6 +93,59 @@ void ExportAagRepr(NodeNetwork &nn, std::string export_path) {
   o.close();
 }
 
+void ExportDot(NodeNetwork &nn, std::string export_path) {
+  std::ofstream o;
+  o.open(export_path);
+  int num_and_gates = 0;
+
+  // Getting all active nodes
+  std::vector<Node*> an;
+  GetActiveNodes(nn.nodes.back()[0], an);
+  GetUniquesAndSort(an);
+  std::cout << "Active nodes size: " << an.size() << std::endl;
+
+  o << "digraph \"aig\" {" << std::endl;
+
+  for (Node input_node : nn.nodes[0]) {
+    o << "I" << input_node.loc1 << "[shape=triangle,color=blue];" << std::endl;
+    o << "\"" << input_node.var_id * 2 << "\"[shape=box];" << std::endl;
+    o << "\"" << input_node.var_id * 2 << "\"->I" << input_node.loc1 << "[arrowhead=none];" << std::endl;
+  }
+
+  bool found;
+  std::string p0_arh;
+  std::string p1_arh;
+  for (int i = 1; i < nn.nodes.size(); i++) {
+    for (int j = 0; j < nn.nodes[i].size(); j++) {
+      found = false;
+      nn.nodes[i][j].negates[0] ? p0_arh = "dot" : p0_arh = "none";
+      nn.nodes[i][j].negates[1] ? p1_arh = "dot" : p1_arh = "none";
+      for (Node* m : an) {
+        if (m->loc0 == nn.nodes[i][j].loc0 && m->loc1 == nn.nodes[i][j].loc1) {
+          o << "\"" << nn.nodes[i][j].var_id * 2 << "\"[style=solid];" << std::endl;
+          o << "\"" << nn.nodes[i][j].var_id * 2 << "\"->\"" << nn.nodes[i][j].parents[0]->var_id * 2 << "\"[arrowhead=" << p0_arh << "];" << std::endl;
+          o << "\"" << nn.nodes[i][j].var_id * 2 << "\"->\"" << nn.nodes[i][j].parents[1]->var_id * 2 << "\"[arrowhead=" << p1_arh << "];" << std::endl;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        o << "\"" << nn.nodes[i][j].var_id * 2 << "\"[style=dotted];" << std::endl;
+        o << "\"" << nn.nodes[i][j].var_id * 2 << "\"->\"" << nn.nodes[i][j].parents[0]->var_id * 2 << "\"[arrowhead=" << p0_arh << ",style=dotted];" << std::endl;
+        o << "\"" << nn.nodes[i][j].var_id * 2 << "\"->\"" << nn.nodes[i][j].parents[1]->var_id * 2 << "\"[arrowhead=" << p1_arh << ",style=dotted];" << std::endl;
+      }
+    }
+  }
+
+  for (Node output_node: nn.nodes[nn.nodes.size() - 1]) {
+    o << "O" << output_node.loc1 << "[shape=triangle,color=blue];" << std::endl;
+    o << "O" << output_node.loc1 << "->\"" << output_node.var_id * 2 << "\"[arrowhead=none];" << std::endl;
+  }
+
+  o << "}";
+  o.close();
+}
+
 void CreateSimulationFile(std::vector<std::vector<bool>> &X, std::string export_path) {
   std::ofstream o;
   o.open(export_path);
@@ -388,8 +441,6 @@ void SearchAroundNode(
   */
 
   // 3: Change parent 0 heuristic search
-#pragma omp critical
-  {
   old_parent = node->parents[0];
   ChangeParent(node, 0, nn);
   pred = Predict(nn, X_train, "tmp");
@@ -404,11 +455,8 @@ void SearchAroundNode(
   node->parents[0] = old_parent;
   // Registering node at old parent again
   node->parents[0]->children.push_back(node);
-  }
 
   // 4: Change parent 1 heuristic search
-#pragma omp critical
-  {
   old_parent = node->parents[1];
   ChangeParent(node, 1, nn);
   pred = Predict(nn, X_train, "tmp");
@@ -423,5 +471,4 @@ void SearchAroundNode(
   node->parents[1] = old_parent;
   // Registering node at old parent again
   node->parents[1]->children.push_back(node);
-  }
 }

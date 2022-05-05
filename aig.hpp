@@ -50,3 +50,5 @@ void SearchAroundNode(
   std::vector<Node*> &parent_candidates,
   std::vector<std::vector<bool>> &X_train,
   std::vector<bool> &y_train);
+
+void ExportDot(NodeNetwork &nn, std::string export_path);

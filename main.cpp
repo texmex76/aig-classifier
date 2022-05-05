@@ -17,9 +17,9 @@
 #include "ml.cpp"
 
 int main (int argc, char *argv[]) {
-  //std::vector<int> num_nodes{5, 3, 3, 3, 1};
+  std::vector<int> num_nodes{5, 4, 4, 1};
   //std::vector<int> num_nodes{16, 16, 16, 16, 16, 16, 16, 1};
-  std::vector<int> num_nodes{784, 512, 128, 32, 1};
+  //std::vector<int> num_nodes{784, 512, 128, 32, 1};
   NodeNetwork nn;
   InitializeNodeNetwork(nn, num_nodes);
 
@@ -27,6 +27,10 @@ int main (int argc, char *argv[]) {
   std::vector<Node*> active_nodes;
   GetActiveNodes(nn.nodes.back()[0], active_nodes);
   GetUniquesAndSort(active_nodes);
+
+  ExportDot(nn, "test.dot");
+  ExportAigToPdf(nn, "test.pdf");
+  return 0;
 
   //// Reading train images and binarizing
   std::vector<std::vector<double>> X_train_;
@@ -124,7 +128,6 @@ int main (int argc, char *argv[]) {
 
   //auto start = std::chrono::high_resolution_clock::now();
 
-#pragma omp parallel for
   for (Node* node : active_nodes) {
     SearchAroundNode(
       node,
