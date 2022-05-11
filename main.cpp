@@ -17,9 +17,10 @@
 #include "ml.cpp"
 
 int main (int argc, char *argv[]) {
-  std::vector<int> num_nodes{5, 4, 4, 1};
+  //std::vector<int> num_nodes{5, 4, 4, 1};
   //std::vector<int> num_nodes{16, 16, 16, 16, 16, 16, 16, 1};
-  //std::vector<int> num_nodes{784, 512, 128, 32, 1};
+  std::vector<int> num_nodes{784, 64, 64, 64, 1};
+  while (true) {
   NodeNetwork nn;
   InitializeNodeNetwork(nn, num_nodes);
 
@@ -28,9 +29,9 @@ int main (int argc, char *argv[]) {
   GetActiveNodes(nn.nodes.back()[0], active_nodes);
   GetUniquesAndSort(active_nodes);
 
-  ExportDot(nn, "test.dot");
-  ExportAigToPdf(nn, "test.pdf");
-  return 0;
+  //ExportDot(nn, "test.dot");
+  //ExportAigToPdf(nn, "test.pdf");
+  //return 0;
 
   //// Reading train images and binarizing
   std::vector<std::vector<double>> X_train_;
@@ -63,20 +64,20 @@ int main (int argc, char *argv[]) {
   BinarizeMNISTLabels(y_train_, y_train);
 
   // Less computation time
-  X_train.resize(10000);
-  y_train.resize(10000);
+  //X_train.resize(10000);
+  //y_train.resize(10000);
 
-  //// Reading test images and binarizing
-  //std::vector<std::vector<double>> X_test_;
-  //ReadMNIST(10000,784,"data/t10k-images.idx3-ubyte", X_test_);
-  //std::vector<std::vector<bool>> X_test;
-  //BinarizeMNIST(X_test_, X_test);
+  // Reading test images and binarizing
+  std::vector<std::vector<double>> X_test_;
+  ReadMNIST(10000,784,"data/t10k-images.idx3-ubyte", X_test_);
+  std::vector<std::vector<bool>> X_test;
+  BinarizeMNIST(X_test_, X_test);
 
-  //// Reading test labels and binarizing
-  //std::vector<double> y_test_;
-  //ReadMNISTLabels(10000, "data/t10k-labels.idx1-ubyte", y_test_);
-  //std::vector<bool> y_test;
-  //BinarizeMNISTLabels(y_test_, y_test);
+  // Reading test labels and binarizing
+  std::vector<double> y_test_;
+  ReadMNISTLabels(10000, "data/t10k-labels.idx1-ubyte", y_test_);
+  std::vector<bool> y_test;
+  BinarizeMNISTLabels(y_test_, y_test);
 
   /*
    Change nothing:    0
@@ -92,7 +93,9 @@ int main (int argc, char *argv[]) {
 
   // Those will be overwritten frequently
   std::vector<bool> pred;
+  std::vector<bool> test_pred;
   double score;
+  double test_score;
   Node* old_parent;
   int no_change = 0;
   std::vector<double> accuracies;
@@ -106,7 +109,7 @@ int main (int argc, char *argv[]) {
   // End
 
   // These are parameters
-  int patience = 10;
+  int patience = 5;
   double tol = 0.001;
 
   out_str_tmp += "arc ";
@@ -177,7 +180,10 @@ int main (int argc, char *argv[]) {
     no_change += 1;
   }
 
-  out_str_tmp = "Iter " + std::to_string(iteration) + " Accuracy " + std::to_string(max) + "\n";
+  test_pred = Predict(nn, X_test, "tmp");
+  test_score = AccuracyScore(y_test, test_pred);
+
+  out_str_tmp = "Iter " + std::to_string(iteration) + " Training accuracy " + std::to_string(max) + " Testing accuracy " + std::to_string(test_score) + "\n";
   std::cout << out_str_tmp;
   out_str += out_str_tmp;
   out_str_tmp = "";
@@ -196,6 +202,7 @@ int main (int argc, char *argv[]) {
   }
 
   SaveRun(nn, out_str, "results");
+  }
 
   return 0;
 }
