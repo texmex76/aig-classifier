@@ -18,11 +18,12 @@
 
 int main (int argc, char *argv[]) {
   //std::vector<int> num_nodes{5, 4, 4, 1};
-  //std::vector<int> num_nodes{16, 16, 16, 16, 16, 16, 16, 1};
-  std::vector<int> num_nodes{784, 64, 64, 64, 1};
+  //std::vector<int> num_nodes{8, 16, 16, 16, 16, 16, 16, 16, 16, 1};
+  std::vector<int> num_nodes{8, 128, 64, 32, 16, 8, 1};
   while (true) {
   NodeNetwork nn;
   InitializeNodeNetwork(nn, num_nodes);
+  // hello
 
   // Getting all active nodes
   std::vector<Node*> active_nodes;
@@ -34,10 +35,32 @@ int main (int argc, char *argv[]) {
   //return 0;
 
   //// Reading train images and binarizing
-  std::vector<std::vector<double>> X_train_;
-  ReadMNIST(60000,784,"data/train-images.idx3-ubyte", X_train_);
-  std::vector<std::vector<bool>> X_train;
-  BinarizeMNIST(X_train_, X_train);
+  //std::vector<std::vector<double>> X_train_;
+  //ReadMNIST(60000,784,"data/train-images.idx3-ubyte", X_train_);
+  //std::vector<std::vector<bool>> X_train;
+  //BinarizeMNIST(X_train_, X_train);
+
+    std::ifstream file("iwls2022-ls-contest/benchmarks/ex03.truth");
+    if (!file) {
+        std::cerr << "Unable to open file\n";
+        return 1;   // call system to stop
+    }
+
+    std::string line;
+    getline(file, line);
+    file.close();
+
+    int arity = std::log2(line.length());
+
+    std::vector<std::vector<bool>> X_train = generateCombinations(arity);
+
+    std::vector<bool> y_train;
+    for (char c : line) {
+        y_train.push_back(c - '0');
+    }
+
+    std::vector<std::vector<bool>> X_test = X_train;
+    std::vector<bool> y_test = y_train;
 
   //// Reading PCA-reduced train images and binarizing
   //std::vector<std::vector<double>> X_train_;
@@ -58,26 +81,26 @@ int main (int argc, char *argv[]) {
   assert (num_nodes.back() == 1); // for now we only do binary classification
 
   //// Reading train labels and binarizing
-  std::vector<double> y_train_;
-  ReadMNISTLabels(60000, "data/train-labels.idx1-ubyte", y_train_);
-  std::vector<bool> y_train;
-  BinarizeMNISTLabels(y_train_, y_train);
+  //std::vector<double> y_train_;
+  //ReadMNISTLabels(60000, "data/train-labels.idx1-ubyte", y_train_);
+  //std::vector<bool> y_train;
+  //BinarizeMNISTLabels(y_train_, y_train);
 
   // Less computation time
   //X_train.resize(10000);
   //y_train.resize(10000);
 
   // Reading test images and binarizing
-  std::vector<std::vector<double>> X_test_;
-  ReadMNIST(10000,784,"data/t10k-images.idx3-ubyte", X_test_);
-  std::vector<std::vector<bool>> X_test;
-  BinarizeMNIST(X_test_, X_test);
+  //std::vector<std::vector<double>> X_test_;
+  //ReadMNIST(10000,784,"data/t10k-images.idx3-ubyte", X_test_);
+  //std::vector<std::vector<bool>> X_test;
+  //BinarizeMNIST(X_test_, X_test);
 
   // Reading test labels and binarizing
-  std::vector<double> y_test_;
-  ReadMNISTLabels(10000, "data/t10k-labels.idx1-ubyte", y_test_);
-  std::vector<bool> y_test;
-  BinarizeMNISTLabels(y_test_, y_test);
+  //std::vector<double> y_test_;
+  //ReadMNISTLabels(10000, "data/t10k-labels.idx1-ubyte", y_test_);
+  //std::vector<bool> y_test;
+  //BinarizeMNISTLabels(y_test_, y_test);
 
   /*
    Change nothing:    0
@@ -152,6 +175,43 @@ int main (int argc, char *argv[]) {
 
   int max_index = std::max_element(accuracies.begin(), accuracies.end()) - accuracies.begin();
   double max = *std::max_element(accuracies.begin(), accuracies.end());
+
+
+
+  // Get the top 5 accuracies
+  //std::vector<double> top5(5);
+  //std::vector<double> acc_cpy = accuracies;
+  //std::partial_sort_copy(acc_cpy.begin(), acc_cpy.end(), top5.begin(), top5.end(), std::greater<double>());
+
+  //// Subtract the minimum accuracy from each of the top 5
+  ////double minAccuracy = *std::min_element(top5.begin(), top5.end());
+  ////std::transform(top5.begin(), top5.end(), top5.begin(), [minAccuracy](double acc) { return acc - minAccuracy; });
+
+  //// Normalize the top 5 accuracies
+  //std::vector<double> top5_cpy = top5;
+  //double sum = std::accumulate(top5_cpy.begin(), top5_cpy.end(), 0.0);
+  //std::transform(top5_cpy.begin(), top5_cpy.end(), top5_cpy.begin(), [sum](double acc) { return acc / sum; });
+  //for (auto x : top5_cpy) {
+    //std::cout << x << " ";
+  //}
+  //std::cout << std::endl;
+
+  //// Create a random number generator
+  //std::random_device rd;
+  //std::mt19937 gen(rd());
+  //std::discrete_distribution<> dist(top5_cpy.begin(), top5_cpy.end());
+
+  //// Sample from the top 5 accuracies
+  //int sampleIndex = dist(gen);
+  //double sampledAccuracy = top5[sampleIndex];
+
+  //// Find the original index of the sampled accuracy in the 'accuracies' vector
+  //std::vector<double>::iterator it = std::find(accuracies.begin(), accuracies.end(), sampledAccuracy);
+  //int max_index = std::distance(accuracies.begin(), it);
+  //double max = accuracies[max_index];
+
+
+
 
   if (max > best + tol) {
     best = max;

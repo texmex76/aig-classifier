@@ -8,3 +8,4 @@ std::string GenerateHex(const unsigned int len);
 
 void GetUniquesAndSort(std::vector<Node*> &v);
 
+std::vector<std::vector<bool>> generateCombinations(int arity);

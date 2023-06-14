@@ -6,3 +6,6 @@ main
 .ipynb_checkpoints/
 __pycache__/
 results/
+tags
+iwls2022-ls-contest
+find_duplicate.sh

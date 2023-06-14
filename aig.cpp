@@ -1,4 +1,5 @@
 #include "aig.hpp"
+#include <experimental/algorithm>
 #include "utils.cpp"
 #include "ml.hpp"
 
@@ -300,10 +301,10 @@ void ChangeParent(Node* node, int parent_idx, NodeNetwork &nn) {
   assert(nn.nodes[i].size() > 2); // If a layer has only 2 nodes, then there is nothing to change
   }
   while (true) {
-    std::vector<int> row_idxs(node->loc0);
-    std::iota(row_idxs.begin(), row_idxs.end(), 0);
-    std::vector<int> choice_row;
-    std::experimental::sample(row_idxs.begin(), row_idxs.end(), std::back_inserter(choice_row), 1, std::mt19937{std::random_device{}()});
+    //std::vector<int> row_idxs(node->loc0);
+    //std::iota(row_idxs.begin(), row_idxs.end(), 0);
+    std::vector<int> choice_row = {node->loc0 - 1};
+    //std::experimental::sample(row_idxs.begin(), row_idxs.end(), std::back_inserter(choice_row), 1, std::mt19937{std::random_device{}()});
 
     std::vector<int> col_idxs(nn.nodes[choice_row[0]].size());
     std::iota(col_idxs.begin(), col_idxs.end(), 0);
@@ -386,59 +387,57 @@ void SearchAroundNode(
   parent_candidates.emplace_back(); // Adding empty item
   node->negates[1] = !node->negates[1]; // Reverting modes
 
-  /*
   // Change parent 0 full search
-  old_parent = node->parents[0];
-  for (int i = 0; i < node->loc0; i++) {
-    for (int j = 0; j < nn.nodes[i].size(); j++) {
-      if (!(i != node->parents[0]->loc0 && j != node->parents[0]->loc1) &&
-          !(i != node->parents[1]->loc0 && j != node->parents[1]->loc1)) {
-        node->parents[0]->children.erase(std::find(node->parents[0]->children.begin(),node->parents[0]->children.end(),node));
-        node->parents[0] = &nn.nodes[i][j];
-        node->parents[0]->children.push_back(node);
-      //
-        pred = Predict(nn, X_train, "tmp");
-        score = AccuracyScore(y_train, pred);
-        accuracies.push_back(score);
-        mode.push_back(3); // 3 stands for "change parent 0"
-        node_candidates.push_back(node);
-        parent_candidates.push_back(node->parents[0]);
-        // Deregistering node from new parent
-        node->parents[0]->children.erase(std::find(node->parents[0]->children.begin(),node->parents[0]->children.end(),node));
-        // Setting parent to old parent
-        node->parents[0] = old_parent;
-        // Registering node at old parent again
-        node->parents[0]->children.push_back(node);
-      }
-    }
-  }
+  //old_parent = node->parents[0];
+  //for (int i = 0; i < node->loc0; i++) {
+    //for (int j = 0; j < nn.nodes[i].size(); j++) {
+      //if (!(i != node->parents[0]->loc0 && j != node->parents[0]->loc1) &&
+          //!(i != node->parents[1]->loc0 && j != node->parents[1]->loc1)) {
+        //node->parents[0]->children.erase(std::find(node->parents[0]->children.begin(),node->parents[0]->children.end(),node));
+        //node->parents[0] = &nn.nodes[i][j];
+        //node->parents[0]->children.push_back(node);
+      ////
+        //pred = Predict(nn, X_train, "tmp");
+        //score = AccuracyScore(y_train, pred);
+        //accuracies.push_back(score);
+        //mode.push_back(3); // 3 stands for "change parent 0"
+        //node_candidates.push_back(node);
+        //parent_candidates.push_back(node->parents[0]);
+        //// Deregistering node from new parent
+        //node->parents[0]->children.erase(std::find(node->parents[0]->children.begin(),node->parents[0]->children.end(),node));
+        //// Setting parent to old parent
+        //node->parents[0] = old_parent;
+        //// Registering node at old parent again
+        //node->parents[0]->children.push_back(node);
+      //}
+    //}
+  //}
 
-  // Change parent 1 full search
-  old_parent = node->parents[1];
-  for (int i = 0; i < node->loc0; i++) {
-    for (int j = 0; j < nn.nodes[i].size(); j++) {
-      if (!(i != node->parents[0]->loc0 && j != node->parents[0]->loc1) &&
-          !(i != node->parents[1]->loc0 && j != node->parents[1]->loc1)) {
-        node->parents[1]->children.erase(std::find(node->parents[1]->children.begin(),node->parents[1]->children.end(),node));
-        node->parents[1] = &nn.nodes[i][j];
-        node->parents[1]->children.push_back(node);
-      //
-        pred = Predict(nn, X_train, "tmp");
-        score = AccuracyScore(y_train, pred);
-        accuracies.push_back(score);
-        mode.push_back(4); // 3 stands for "change parent 0"
-        node_candidates.push_back(node);
-        parent_candidates.push_back(node->parents[1]);
-        // Deregistering node from new parent
-        node->parents[1]->children.erase(std::find(node->parents[1]->children.begin(),node->parents[1]->children.end(),node));
-        // Setting parent to old parent
-        node->parents[1] = old_parent;
-        // Registering node at old parent again
-        node->parents[1]->children.push_back(node);
-      }
-    }
-  }
-  */
+  //// Change parent 1 full search
+  //old_parent = node->parents[1];
+  //for (int i = 0; i < node->loc0; i++) {
+    //for (int j = 0; j < nn.nodes[i].size(); j++) {
+      //if (!(i != node->parents[0]->loc0 && j != node->parents[0]->loc1) &&
+          //!(i != node->parents[1]->loc0 && j != node->parents[1]->loc1)) {
+        //node->parents[1]->children.erase(std::find(node->parents[1]->children.begin(),node->parents[1]->children.end(),node));
+        //node->parents[1] = &nn.nodes[i][j];
+        //node->parents[1]->children.push_back(node);
+      ////
+        //pred = Predict(nn, X_train, "tmp");
+        //score = AccuracyScore(y_train, pred);
+        //accuracies.push_back(score);
+        //mode.push_back(4); // 3 stands for "change parent 0"
+        //node_candidates.push_back(node);
+        //parent_candidates.push_back(node->parents[1]);
+        //// Deregistering node from new parent
+        //node->parents[1]->children.erase(std::find(node->parents[1]->children.begin(),node->parents[1]->children.end(),node));
+        //// Setting parent to old parent
+        //node->parents[1] = old_parent;
+        //// Registering node at old parent again
+        //node->parents[1]->children.push_back(node);
+      //}
+    //}
+  //}
 
   // 3: Change parent 0 heuristic search
   old_parent = node->parents[0];

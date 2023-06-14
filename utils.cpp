@@ -1,6 +1,7 @@
 #include "utils.hpp"
 
-// Taken from https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po
+// Taken from
+// https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po
 std::string Exec(const char* cmd) {
   std::array<char, 128> buffer;
   std::string result;
@@ -18,27 +19,44 @@ std::string Exec(const char* cmd) {
 // Taken from https://lowrey.me/guid-generation-in-c-11/
 unsigned char RandomChar() {
   std::random_device rd;
-  std::mt19937 gen(rd()); 
+  std::mt19937 gen(rd());
   std::uniform_int_distribution<> dis(0, 255);
   return static_cast<unsigned char>(dis(gen));
 }
 
 std::string GenerateHex(const unsigned int len) {
   std::stringstream ss;
-  for(auto i = 0; i < len; i++) {
+  for (auto i = 0; i < len; i++) {
     auto rc = RandomChar();
     std::stringstream hexstream;
     hexstream << std::hex << int(rc);
-    auto hex = hexstream.str(); 
+    auto hex = hexstream.str();
     ss << (hex.length() < 2 ? '0' + hex : hex);
-  }        
+  }
   return ss.str();
 }
 // End
 
-// Taken from https://stackoverflow.com/questions/16476099/remove-duplicate-entries-in-a-c-vector
-void GetUniquesAndSort(std::vector<Node*> &v) {
-  std::sort(v.begin(), v.end()); 
+// Taken from
+// https://stackoverflow.com/questions/16476099/remove-duplicate-entries-in-a-c-vector
+void GetUniquesAndSort(std::vector<Node*>& v) {
+  std::sort(v.begin(), v.end());
   auto last = std::unique(v.begin(), v.end());
   v.erase(last, v.end());
+}
+
+std::vector<std::vector<bool>> generateCombinations(int arity) {
+  int totalCombinations =
+      1 << arity;  // Calculate the total number of combinations
+  std::vector<std::vector<bool>> combinations(totalCombinations,
+                                              std::vector<bool>(arity, false));
+
+  for (int i = 0; i < totalCombinations; ++i) {
+    for (int j = 0; j < arity; ++j) {
+      combinations[i][arity - j - 1] =
+          (i >> j) & 1;  // Generate the binary digits for each combination
+    }
+  }
+
+  return combinations;
 }
