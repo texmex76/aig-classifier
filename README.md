@@ -1,6 +1,6 @@
-# AIG Classifier
+# AIG Synthesis via Local Search
 
-Experimental scheme to use AIGs as binary classifiers. Initially a random AIG is built. We therefore specify the number of layers and the number of nodes per layer. Each node takes two parents and if these inputs are negated depends on the random initialization. Using a local greedy search, we try to make the architecture perform better on the dataset (we are currently using binary MNIST). A picture of a random AIG is below. The nodes that are not active are dashed.
+Synthesize AIGs using local search.
 
 ![random AIG](random_aig.jpg)
 
@@ -14,7 +14,7 @@ Experimental scheme to use AIGs as binary classifiers. Initially a random AIG is
 To compile the C++ code:
 
 ```
-gcc main.cpp -lstdc++ -o main
+make
 ```
 
 To run the Python code, just make sure Numpy and Scikit-learn are installed.
