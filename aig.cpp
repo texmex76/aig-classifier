@@ -303,6 +303,7 @@ void ChangeParent(Node* node, int parent_idx, NodeNetwork &nn) {
   while (true) {
     //std::vector<int> row_idxs(node->loc0);
     //std::iota(row_idxs.begin(), row_idxs.end(), 0);
+    // Sequential sampling for now to avoid greediness
     std::vector<int> choice_row = {node->loc0 - 1};
     //std::experimental::sample(row_idxs.begin(), row_idxs.end(), std::back_inserter(choice_row), 1, std::mt19937{std::random_device{}()});
 

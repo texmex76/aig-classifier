@@ -9,3 +9,5 @@ results/
 tags
 iwls2022-ls-contest
 find_duplicate.sh
+*.aag
+*.aig

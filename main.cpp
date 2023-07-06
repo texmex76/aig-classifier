@@ -19,7 +19,8 @@
 int main (int argc, char *argv[]) {
   //std::vector<int> num_nodes{5, 4, 4, 1};
   //std::vector<int> num_nodes{8, 16, 16, 16, 16, 16, 16, 16, 16, 1};
-  std::vector<int> num_nodes{8, 128, 64, 32, 16, 8, 1};
+  //std::vector<int> num_nodes{8, 128, 64, 32, 16, 8, 1};
+  std::vector<int> num_nodes{8, 512, 512, 512, 128, 64, 32, 16, 8, 1};
   while (true) {
   NodeNetwork nn;
   InitializeNodeNetwork(nn, num_nodes);
@@ -32,7 +33,6 @@ int main (int argc, char *argv[]) {
 
   //ExportDot(nn, "test.dot");
   //ExportAigToPdf(nn, "test.pdf");
-  //return 0;
 
   //// Reading train images and binarizing
   //std::vector<std::vector<double>> X_train_;
@@ -40,7 +40,7 @@ int main (int argc, char *argv[]) {
   //std::vector<std::vector<bool>> X_train;
   //BinarizeMNIST(X_train_, X_train);
 
-    std::ifstream file("iwls2022-ls-contest/benchmarks/ex03.truth");
+    std::ifstream file("iwls2022-ls-contest/benchmarks/ex02.truth");
     if (!file) {
         std::cerr << "Unable to open file\n";
         return 1;   // call system to stop
@@ -175,6 +175,7 @@ int main (int argc, char *argv[]) {
 
   int max_index = std::max_element(accuracies.begin(), accuracies.end()) - accuracies.begin();
   double max = *std::max_element(accuracies.begin(), accuracies.end());
+  //
 
 
 
